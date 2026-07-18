@@ -1,0 +1,69 @@
+# SPDX-License-Identifier: Apache-2.0
+
+config VOLTAGE_MONITOR
+	bool "Voltage monitor sensor"
+	default y
+	depends on DT_HAS_APP_VOLTAGE_MONITOR_ENABLED
+	help
+	  Enable voltage monitor sensor driver.
+	  Select the data source backend below.
+
+if VOLTAGE_MONITOR
+
+choice VMON_BACKEND
+	prompt "Voltage monitor data source"
+	optional
+	help
+	  Select how the voltage monitor acquires its data.
+
+	  IMPORTANT: You MUST explicitly enable one backend in prj.conf:
+	    CONFIG_VMON_BACKEND_ADC=y    (internal ADC)
+	    CONFIG_VMON_BACKEND_I2C=y    (external I2C sensor)
+
+	  The required subsystem (ADC or I2C) must also be enabled.
+	  If neither is set, the build will fail with #error.
+
+config VMON_BACKEND_ADC
+	bool "Internal ADC"
+	depends on ADC
+	help
+	  Read voltage from an internal ADC peripheral (io-channels).
+	  Requires CONFIG_ADC=y in prj.conf.
+
+config VMON_BACKEND_I2C
+	bool "External I2C sensor"
+	depends on I2C
+	help
+	  Read voltage from an I2C-connected sensor (INA219, INA226,
+	  ADS1115, or any I2C voltage source).
+	  Requires CONFIG_I2C=y in prj.conf.
+
+endchoice
+
+if VMON_BACKEND_I2C
+
+config VMON_I2C_READ_BYTES
+	int "I2C read length (bytes)"
+	default 4
+	range 1 8
+	help
+	  Number of bytes to read from the I2C sensor. Raw bytes are
+	  assembled into a uint32_t in little-endian order.
+
+config VMON_I2C_SCALE_NUM
+	int "Raw → mV numerator"
+	default 1
+	help
+	  Numerator of the scaling factor: mV = raw * NUM / DEN.
+	  Default 1 means raw value is already in mV.
+
+config VMON_I2C_SCALE_DEN
+	int "Raw → mV denominator"
+	default 1
+	help
+	  Denominator of the scaling factor: mV = raw * NUM / DEN.
+	  Default 1 means raw value is already in mV.
+
+endif # VMON_BACKEND_I2C
+
+endif # VOLTAGE_MONITOR

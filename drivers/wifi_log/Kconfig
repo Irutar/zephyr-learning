@@ -1,0 +1,33 @@
+config APP_WIFI_LOG
+    bool "Wi-Fi Log Driver"
+    default y
+    help
+      Sends app trace logs over Wi-Fi via TCP to a remote server.
+
+if APP_WIFI_LOG
+
+config APP_WIFI_LOG_SSID
+    string "Wi-Fi SSID"
+    default "MyWiFi"
+    help
+      SSID of the Wi-Fi network to connect to.
+
+config APP_WIFI_LOG_PSK
+    string "Wi-Fi Password"
+    default "password123"
+    help
+      Pre-shared key (password) for WPA/WPA2.
+
+config APP_WIFI_LOG_SERVER_IP
+    string "Log server IP address"
+    default "192.168.1.100"
+    help
+      IPv4 address of the TCP log server.
+
+config APP_WIFI_LOG_SERVER_PORT
+    int "Log server TCP port"
+    default 5555
+    help
+      TCP port on which the log server listens.
+
+endif # APP_WIFI_LOG

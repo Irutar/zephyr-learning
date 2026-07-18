@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: Apache-2.0
+
+config APP_UTILS
+	bool "Application Utility Library"
+	default y
+	help
+	  Common utility functions used across the application.

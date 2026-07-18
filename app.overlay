@@ -1,0 +1,18 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Application-level Devicetree overlay for my_app.
+ *
+ * Applied to ALL boards. For board-specific DT, see boards/.
+ * Module DTS files are added via DTC_OVERLAY_FILE in CMakeLists.txt.
+ */
+
+/ {
+	aliases {
+		/*
+		 * Application-level alias for the trace UART.
+		 * Used by the UART trace driver via DT_ALIAS(trace_uart).
+		 */
+		trace-uart = &uart0;
+	};
+};

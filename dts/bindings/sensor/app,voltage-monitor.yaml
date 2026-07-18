@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: Apache-2.0
+description: Voltage monitor sensor — multi-backend (ADC, I2C)
+
+compatible: "app,voltage-monitor"
+
+include: base.yaml
+
+properties:
+  io-channels:
+    type: phandle-array
+    required: false
+    description: |
+      ADC channel spec. Required when CONFIG_VMON_BACKEND_ADC=y.
+      Example: io-channels = <&adc0 6>;
+
+  zephyr,gain:
+    type: string
+    required: false
+    description: ADC gain (ADC_GAIN_1, ADC_GAIN_1_4, etc.)
+
+  zephyr,reference:
+    type: string
+    required: false
+    description: ADC reference (ADC_REF_INTERNAL, ADC_REF_EXTERNAL, etc.)
+
+  zephyr,acquisition-time:
+    type: int
+    required: false
+    description: ADC acquisition time
+
+  zephyr,resolution:
+    type: int
+    required: false
+    description: ADC resolution in bits
+
+  i2c-bus:
+    type: phandle
+    required: false
+    description: |
+      I2C bus phandle. Required when CONFIG_VMON_BACKEND_I2C=y.
+      Example: i2c-bus = <&i2c0>;
+
+  i2c-addr:
+    type: int
+    required: false
+    description: |
+      I2C address. Required when CONFIG_VMON_BACKEND_I2C=y.
+      Example: i2c-addr = <0x40>;

@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: Apache-2.0
+#
+# Application Kconfig for my_app.
+#
+rsource "drivers/Kconfig"
+# Future: rsource "lib/Kconfig"
+
+source "Kconfig.zephyr"
+
+menu "my_app Configuration"
+
+config APP_SYSTEM_INFO_INTERVAL
+	int "System info print interval (iterations)"
+	default 10
+	range 1 3600
+	help
+	  Print extended system information every N trace iterations.
+
+config APP_LOOP_PERIOD_MS
+	int "Main loop period (ms)"
+	default 1000
+	help
+	  Main loop sleep interval in milliseconds.
+
+config APP_I2C_POLL_MS
+	int "I2C poll interval (ms)"
+	default 500
+	help
+	  How often to poll the I2C slave.
+
+endmenu
