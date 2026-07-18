@@ -1,0 +1,38 @@
+{
+    // ── Zephyr build ──────────────────────────────────────────
+    "zephyr.workspace": "${workspaceFolder}/..",
+    "zephyr.buildDir": "${workspaceFolder}/build/esp32_devkitc/esp32/procpu",
+    
+    // ── DeviceTree extension ──────────────────────────────────
+    "devicetree.defaultBoard": "esp32_devkitc/esp32/procpu",
+    "devicetree.zephyr": "${workspaceFolder}/../zephyr",
+    "devicetree.dtsPaths": [
+        "${workspaceFolder}/../zephyr/dts",
+        "${workspaceFolder}/dts"
+    ],
+    "devicetree.bindingsPaths": [
+        "${workspaceFolder}/../zephyr/dts/bindings",
+        "${workspaceFolder}/dts/bindings"
+    ],
+    
+    // ── C/C++ IntelliSense ────────────────────────────────────
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/build/esp32_devkitc/esp32/procpu/compile_commands.json",
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    
+    // ── General ───────────────────────────────────────────────
+    "files.associations": {
+        "*.overlay": "dts",
+        "*.dtsi": "dts",
+        "*.conf": "properties",
+        "Kconfig": "kconfig",
+        "Kconfig.*": "kconfig"
+    },
+    
+    // ── Ignore build artifacts ────────────────────────────────
+    "files.exclude": {
+        "build/": true
+    },
+    "search.exclude": {
+        "build/": true
+    }
+}
