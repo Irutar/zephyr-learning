@@ -14,5 +14,8 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
+# Local secrets
+prj_local.conf
+
 # Zephyr generated
 *_generated.h

@@ -12,6 +12,12 @@ set(DTC_OVERLAY_FILE
   "${CMAKE_CURRENT_SOURCE_DIR}/drivers/sensor/voltage_monitor/vmon.dtsi"
 )
 
+# Local secrets (Wi-Fi credentials, etc.) — NOT tracked by git.
+# Create prj_local.conf if you need to override placeholders.
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/prj_local.conf")
+  set(OVERLAY_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/prj_local.conf")
+endif()
+
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(my_app)
 
