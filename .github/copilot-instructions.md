@@ -1,5 +1,25 @@
 # Copilot Agent Instructions
 
+## Environment
+- **WSL**: We are running inside Windows Subsystem for Linux (WSL2, Ubuntu 22.04).
+- **WSL user**: `irutar`. Windows host user: `krystian`.
+- **Zephyr base**: `/home/irutar/zephyrproject/zephyr`
+- **West workspace**: `/home/irutar/zephyrproject`
+- **Python venv**: `/home/irutar/zephyrproject/.venv`
+- **SDK**: `/home/irutar/zephyr-sdk-1.0.1`
+
+## Git Rules
+- **NEVER** run `git add`, `git commit`, or `git push` unless the user
+  explicitly says something like "zrób commit", "commitnij", "wypchnij", etc.
+- `git status`, `git diff`, `git log` are fine anytime.
+
+## Agent Memory Rules
+- **All** project-specific instructions, rules, and context stay in **this file**
+  (`.github/copilot-instructions.md`) or in the repo.
+- Do **NOT** store repo-specific info in `/memories/` or any external location.
+- When working on a different project, that project will have its own instructions.
+- `/memories/` is only for global/personal preferences, not project rules.
+
 ## Target Hardware
 - **Board**: ESP32-DevKitC V4 (ESP32-WROVER-IE)
 - **SoC**: ESP32 (Xtensa LX6, single core — PROCPU variant)

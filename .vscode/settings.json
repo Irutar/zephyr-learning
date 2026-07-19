@@ -1,12 +1,21 @@
 {
     // ── DeviceTree extension ──────────────────────────────────
     "devicetree.defaultBoard": "esp32_devkitc/esp32/procpu",
-    "devicetree.zephyr": "/home/irutar/zephyrproject/zephyr",
+    "devicetree.zephyr": "/home/irutar/zephyrproject",
     "devicetree.west": "/home/irutar/zephyrproject/.venv/bin/west",
     "devicetree.bindings": [
         "/home/irutar/zephyrproject/zephyr/dts/bindings",
         "/home/irutar/zephyrproject/my_app/dts/bindings"
     ],
+    
+    // ── Kconfig extension ─────────────────────────────────────
+    "kconfig.zephyr.west": "/home/irutar/zephyrproject/.venv/bin/west",
+    "kconfig.zephyr.base": "/home/irutar/zephyrproject/zephyr",
+    "kconfig.zephyr.board": {
+        "dir": "/home/irutar/zephyrproject/zephyr/boards/espressif/esp32_devkitc",
+        "board": "esp32_devkitc_procpu",
+        "arch": "xtensa"
+    },
     
     // ── Zephyr IDE extension ──────────────────────────────────
     "zephyr-ide.globalDirectory": "/home/irutar/zephyrproject",

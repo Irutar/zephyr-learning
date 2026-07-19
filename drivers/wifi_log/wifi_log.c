@@ -95,7 +95,6 @@ int wifi_log_init(void)
 
 	log_dual_inf("Connecting to Wi-Fi: %s", CONFIG_APP_WIFI_LOG_SSID);
 
-	/* Step 1: Scan to check if the network exists */
 	log_dual_inf("Scanning for Wi-Fi networks...");
 	net_mgmt_init_event_callback(&scan_cb, scan_event_handler,
 				     NET_EVENT_WIFI_SCAN_RESULT |
@@ -109,7 +108,6 @@ int wifi_log_init(void)
 		return -EIO;
 	}
 
-	/* Wait up to 15 seconds for scan to complete */
 	if (k_sem_take(&scan_done, K_SECONDS(15)) != 0) {
 		log_dual_err("Wi-Fi scan timed out");
 		net_mgmt_del_event_callback(&scan_cb);
@@ -123,8 +121,7 @@ int wifi_log_init(void)
 	}
 	log_dual_inf("SSID '%s' found, connecting...", CONFIG_APP_WIFI_LOG_SSID);
 
-	/* Step 2: Connect */
-	/* Register for IP address event before connecting */
+
 	net_mgmt_init_event_callback(&ip_cb, ip_event_handler,
 				     NET_EVENT_IPV4_ADDR_ADD);
 	net_mgmt_add_event_callback(&ip_cb);
@@ -136,7 +133,7 @@ int wifi_log_init(void)
 	}
 
 	log_dual_inf("Waiting for IP via DHCP...");
-	/* Wait up to 30 seconds for DHCP */
+
 	if (k_sem_take(&ip_ready, K_SECONDS(30)) != 0) {
 		log_dual_err("DHCP timeout – no IP address");
 		net_mgmt_del_event_callback(&ip_cb);
@@ -216,7 +213,6 @@ static void wifi_log_send_inner(const char *level, const char *tag,
 		if (!wifi_ready) {
 			ring_buf_put(&log_ring, (uint8_t *)buf, len);
 		} else {
-			/* Reconnected in this call – send current message too */
 			int sent = zsock_sendto(sock, buf, len, 0,
 				     (struct sockaddr *)&server_addr,
 				     sizeof(server_addr));
