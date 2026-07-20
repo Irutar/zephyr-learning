@@ -21,7 +21,7 @@
 		 * === ADC BACKEND ===================================
 		 * DELETE this block if your board has no ADC.
 		 */
-		io-channels = <&adc0 6>;		/* zmień kanał */
+		io-channels = <&adc0 6>;		/* change channel to match your board */
 		zephyr,gain = "ADC_GAIN_1_4";
 		zephyr,reference = "ADC_REF_INTERNAL";
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
@@ -31,7 +31,7 @@
 		 * === I2C BACKEND ===================================
 		 * DELETE this block if your board has no I2C.
 		 */
-		i2c-bus = <&i2c0>;			/* zmień bus */
-		i2c-addr = <0x20>;			/* zmień adres */
+		i2c-bus = <&i2c0>;			/* change bus to match your board */
+		i2c-addr = <0x20>;			/* change address to match your sensor */
 	};
 };

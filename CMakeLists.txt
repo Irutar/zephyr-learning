@@ -3,12 +3,16 @@
 cmake_minimum_required(VERSION 3.20.0)
 
 # DTC_OVERLAY_FILE must be set BEFORE find_package.
-# Board overlay is appended automatically. Add module overlays here.
-string(REPLACE "/" "_" BOARD_QUAL ${BOARD})
+# Board-specific overlays in boards/ are picked up automatically by Zephyr.
+# Add module overlays here.
+
+# BOARD is not yet defined before find_package in sysbuild context,
+# so we glob board overlays instead of relying on ${BOARD}.
+file(GLOB BOARD_OVERLAYS "${CMAKE_CURRENT_SOURCE_DIR}/boards/*.overlay")
+
 set(DTC_OVERLAY_FILE
   "${CMAKE_CURRENT_SOURCE_DIR}/app.overlay"
-  "${CMAKE_CURRENT_SOURCE_DIR}/boards/${BOARD_QUAL}.overlay"
-  # ── module overlays ──────────────────────────────
+  ${BOARD_OVERLAYS}
   "${CMAKE_CURRENT_SOURCE_DIR}/drivers/sensor/voltage_monitor/vmon.dtsi"
 )
 
@@ -26,6 +30,9 @@ project(my_app)
 set(DTS_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_sources(app PRIVATE src/main.c)
+target_sources(app PRIVATE src/image_update/image_update.c)
+target_sources(app PRIVATE src/image_update/self_copy.c)
+target_sources(app PRIVATE src/image_update/slot_selector.c)
 
 target_sources_ifdef(CONFIG_APP_WIFI_LOG app PRIVATE
   drivers/wifi_log/wifi_log.c

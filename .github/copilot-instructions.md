@@ -94,6 +94,51 @@
 - This catches accidental assignment (`=` instead of `==`) at compile time
   because you cannot assign to a constant.
 
+### 7. Public Function Naming — Module Prefix Required
+- Every **public** function (declared in a header, callable from other
+  translation units) **must** begin with the name of the module that
+  exports it, followed by an underscore.
+  - Module `self_copy` → `self_copy_sync_slots()`, `self_copy_verify()`, …
+  - Module `slot_selector` → `slot_selector_boot_source_read()`,
+    `slot_selector_magic_write()`, …
+  - Module `image_update` → `image_update_perform()`, `image_update_reboot()`, …
+- **Static** (file-local) functions do **not** need a prefix.
+- When moving a function to a different module, rename it to match its
+  new home.
+
+### 8. Function Order — Group by Visibility
+- Inside every `.c` file, group functions by their linkage type, in this
+  order:
+  1. **`static inline`** functions (rare in `.c` files, common in headers)
+  2. **`static`** (file-local) functions
+  3. **Public** (non-`static`, declared in a header) functions
+- Within each group, order does not matter; keep related functions close.
+- In `.h` headers: `static inline` implementations first, then public
+  declarations.
+
+### 9. Headers — Public Declarations Only
+- Header files (`.h`) contain **only** declarations of public
+  (non-`static`) functions, plus type definitions, macros, and `extern`
+  variables.
+- **Never** put `static` or `static inline` function **implementations**
+  in a header.  Move them to the corresponding `.c` file.
+- When a function changes from public to `static`, remove its declaration
+  from the header immediately.  When a function becomes public, add its
+  declaration to the appropriate header.
+
+### 10. Every Function Has a Declaration
+- **Public** functions: declaration in the module's header (`.h`),
+  definition in the module's source (`.c`).
+- **Static** functions: if called before they are defined, add a forward
+  declaration at the top of the `.c` file (after includes, before the
+  first function body).  If defined before all call sites, no forward
+  declaration is needed.
+- **Never** use `extern` declarations inside `.c` files — include the
+  header that owns the function instead.
+- **Never** put `static inline` implementations in headers.  If a
+  function is simple enough that you want it inlined, make it a regular
+  public function and trust the compiler's link-time optimisation (LTO).
+
 ## Git Rules
 - **NEVER** run `git add`, `git commit`, or `git push` unless the user
   explicitly says something like "zrób commit", "commitnij", "wypchnij", etc.
@@ -102,6 +147,11 @@
   **Implemented Features** section with any new functionality that was added
   since the last push. Ask the user if unsure whether something warrants a
   README update.
+- **README must match the code.** After updating `README.md`, verify that
+  every claim it makes is backed by actual code — correct file paths,
+  accurate function names, matching partition offsets, existing headers,
+  valid build commands. If `README.md` says something exists, it must exist
+  in the repository. Delete or correct any stale statements.
 
 ## Agent Memory Rules
 - **All** project-specific instructions, rules, and context stay in **this file**

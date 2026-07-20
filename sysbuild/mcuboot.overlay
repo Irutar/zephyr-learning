@@ -1,0 +1,24 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * MCUboot devicetree overlay.
+ *
+ * Applied automatically by sysbuild to the mcuboot image.
+ * Shares the partition layout with the application via dts/partitions_4m.dtsi.
+ *
+ * Routes mcuboot console to UART1 (same as the application) so all
+ * output appears on one serial port (GPIO10 TX, GPIO9 RX).
+ */
+
+#include "../dts/partitions_4m.dtsi"
+
+/ {
+	chosen {
+		zephyr,console = &uart1;
+		zephyr,code-partition = &boot_partition;
+	};
+};
+
+&uart1 {
+	status = "okay";
+};

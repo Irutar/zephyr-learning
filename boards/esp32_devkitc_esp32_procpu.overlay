@@ -2,12 +2,9 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Board-specific Devicetree overlay for ESP32-DevKitC PROCPU.
- *
- * Place board-specific DT overrides here (e.g. enabling board LEDs,
- * sensors, or pinmux customizations that only apply to this board).
- *
- * Application-level aliases (e.g. trace-uart) live in ../app.overlay.
  */
+
+#include "../dts/partitions_4m.dtsi"
 
 /* Ensure the BOOT button GPIO is enabled for this board */
 &gpio0 {
@@ -25,6 +22,7 @@
  / {
 	chosen {
 		zephyr,console = &uart1;
+		zephyr,code-partition = &slot0_partition;
 	};
 
 	leds {
