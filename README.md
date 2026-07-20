@@ -93,6 +93,17 @@ Without this trailer skip, a byte-for-byte copy would carry slot0's
 `magic=GOOD, image_ok=SET` into slot1's trailer, which the MCUboot swap table
 interprets as "pending permanent upgrade" — triggering the crash.
 
+After the copy, `self_copy` re-reads both slots and computes a CRC32
+checksum comparing the source and destination (trailer excluded).  If the
+CRCs differ the copy is retried once; on persistent mismatch the device
+halts rather than risking a boot from a corrupted slot.  The same CRC
+check runs in `image_update_perform()` before switching to slot1.
+
+Reboot is done via the ESP32 RTC_CNTL hardware register (`0x3FF48000`)
+because `sys_reboot(SYS_REBOOT_COLD)` can hang after heavy flash I/O —
+the flash cache is left in an inconsistent state after the copy/verify
+pass, and the hardware reset bypasses all software layers.
+
 #### RTC Slot Selector (`include/app/slot_selector.h`, `src/image_update/slot_selector.c`)
 
 ESP32 RTC slow memory (8 KB at `0x50000000`, survives warm reboot, lost on
@@ -201,8 +212,7 @@ my_app/
 ├── bootloader/                   # Local modifications to upstream MCUboot
 │   └── mcuboot/
 │       └── boot/zephyr/
-│           ├── arch/esp32.c      # RTC slot selector + THREADPTR clear
-│           └── main.c.patch      # Added #include <zephyr/sys/printk.h>
+│           └── arch/esp32.c      # RTC slot selector + THREADPTR clear
 ├── drivers/
 │   ├── wifi_log/
 │   │   └── wifi_log.c            # Dual-output logging driver (UART + Wi-Fi)
