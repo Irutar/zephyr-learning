@@ -7,12 +7,32 @@
 #include "../dts/partitions_4m.dtsi"
 
 /* Ensure the BOOT button GPIO is enabled for this board */
+
+&pinctrl {
+	uart2_pins: uart2_pins {
+		group1 {
+			pinmux = <UART2_TX_GPIO27>;
+		};
+
+		group2 {
+			pinmux = <UART2_RX_GPIO26>;
+			bias-pull-up;
+		};
+	};
+};
+
 &gpio0 {
 	status = "okay";
 };
 
 &uart1 {
 	status = "okay";
+};
+
+&uart2 {
+	status = "okay";
+	current-speed = <115200>;
+	pinctrl-0 = <&uart2_pins>;
 };
 
 &adc0 { status = "okay"; };

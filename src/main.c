@@ -4,6 +4,8 @@
 #include <zephyr/drivers/gpio.h>
 #include <string.h>
 
+#include "uart_comm/uart_comm.h"
+
 #define DUAL_LOG_TAG "main"
 #include <app/wifi_log.h>
 #include <app/slot_selector.h>
@@ -11,9 +13,9 @@
 
 LOG_MODULE_REGISTER(my_app, LOG_LEVEL_DBG);
 
-
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(DT_NODELABEL(led0), gpios);
 static const struct device *voltage_monitor = DEVICE_DT_GET(DT_NODELABEL(vmon));
+static const struct device *uart_communicator = DEVICE_DT_GET(DT_NODELABEL(uart2));
 
 static void voltage_monitor_print(const struct device *device)
 {
@@ -47,14 +49,23 @@ static void print_system_info(void)
 	log_dual_inf("--------------------");
 }
 
-/*
- * RTC slow memory holds garbage after cold boot.  Detect and default to slot0.
- */
+static void on_uart_line(const uint8_t *data, size_t length, void *context)
+{
+	(void)context;
+
+	log_dual_inf("UART RX [%d]: %.*s", (int)length, (int)length, data);
+
+	uart_comm_send(data, length);
+	uart_comm_send((const uint8_t *)"\r\n", 2);
+}
+
 int main(void)
 {
-	uint32_t tick = 0;
+	uint32_t tick;
 	uint32_t boot_source;
 	int error;
+
+	tick = 0;
 
 	boot_source = slot_selector_boot_source_read();
 	if ((0 != boot_source) && (1 != boot_source)) {
@@ -90,10 +101,19 @@ int main(void)
 
 	image_update_perform(boot_source);
 
+	if (false == device_is_ready(uart_communicator)) {
+		log_dual_err("UART communicator not ready");
+	} else {
+		uart_comm_set_rx_callback(on_uart_line, NULL);
+		uart_comm_init(uart_communicator);
+	}
+
 	while (1) {
 		tick++;
 
 		gpio_pin_toggle_dt(&led);
+
+		uart_comm_poll();
 
 		if (0 == (tick % (1000 / CONFIG_APP_LOOP_PERIOD_MS))) {
 			voltage_monitor_print(voltage_monitor);

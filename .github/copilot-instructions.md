@@ -57,7 +57,37 @@
   Only add a comment when you genuinely cannot make the code itself tell
   the story.
 
-### 4. Variable Declarations — Top of Scope Only
+### 4. No Ternary Operators — Use If Statements
+- **Never** use the `? :` ternary operator.
+- Always use a plain `if` statement instead. It is always more readable.
+  - Banned: `chunk = (available < contiguous) ? available : contiguous;`
+  - Required:
+    ```c
+    chunk = available;
+    if (chunk > contiguous) {
+        chunk = contiguous;
+    }
+    ```
+
+### 5. Brace Placement — Opening Brace on New Line
+- The opening brace `{` of every block (`if`, `while`, `for`, `do`, `switch`,
+  function body) **must** be placed on its own line, aligned with the
+  statement that opens the block.
+  - Banned:
+    ```c
+    while (bytes_read > 0) {
+        do_something();
+    }
+    ```
+  - Required:
+    ```c
+    while (bytes_read > 0)
+    {
+        do_something();
+    }
+    ```
+
+### 6. Variable Declarations — Top of Scope Only
 - **All** local variables must be declared at the **top** of their block
   (function, loop body, or `{ }` compound statement).
 - **Never** interleave declarations with code (C99 mixed declarations).
@@ -79,14 +109,14 @@
   }
   ```
 
-### 5. Explicit Boolean Comparisons — No Implicit Truthiness
+### 7. Explicit Boolean Comparisons — No Implicit Truthiness
 - **Never** use a variable or expression directly as a boolean condition.
 - Always compare against an explicit value: `NULL`, `0`, `false`, etc.
   - Banned: `if (pointer)`, `if (!error)`, `if (count)`, `while (remaining)`
   - Required: `if (pointer != NULL)`, `if (error == 0)`, `if (count > 0)`,
     `while (remaining > 0)`
 
-### 6. Yoda Notation — Constant on the Left
+### 8. Yoda Notation — Constant on the Left
 - In all equality and relational comparisons, put the **constant or macro
   on the left** side.
   - Banned: `if (result == 0)`, `if (error == -ENODEV)`, `if (count > 5)`
@@ -94,7 +124,7 @@
 - This catches accidental assignment (`=` instead of `==`) at compile time
   because you cannot assign to a constant.
 
-### 7. Public Function Naming — Module Prefix Required
+### 9. Public Function Naming — Module Prefix Required
 - Every **public** function (declared in a header, callable from other
   translation units) **must** begin with the name of the module that
   exports it, followed by an underscore.
@@ -106,7 +136,7 @@
 - When moving a function to a different module, rename it to match its
   new home.
 
-### 8. Function Order — Group by Visibility
+### 10. Function Order — Group by Visibility
 - Inside every `.c` file, group functions by their linkage type, in this
   order:
   1. **`static inline`** functions (rare in `.c` files, common in headers)
@@ -116,7 +146,7 @@
 - In `.h` headers: `static inline` implementations first, then public
   declarations.
 
-### 9. Headers — Public Declarations Only
+### 11. Headers — Public Declarations Only
 - Header files (`.h`) contain **only** declarations of public
   (non-`static`) functions, plus type definitions, macros, and `extern`
   variables.

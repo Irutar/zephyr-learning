@@ -58,6 +58,27 @@ during intermittent connectivity.
 The `log_dual_*()` macros (`log_dual_inf`, `log_dual_err`, etc.) route every
 message to both backends transparently.
 
+### IRQ-driven UART Communication (`src/uart_comm/`)
+
+A reusable UART communication module built on Zephyr's interrupt-driven
+UART API. Designed with safety-critical patterns in mind:
+
+- **Lock-free RX**: ISR drains the UART FIFO into a circular buffer using
+  atomic 32-bit indices — no kernel objects in the ISR path.
+- **Flat TX circular buffer**: `uart_comm_send()` copies complete messages
+  directly into a transmit ring buffer. The ISR feeds the UART FIFO from
+  it in small chunks, handling wrap-around transparently.
+- **Line-based protocol**: `\n` serves as the message terminator.
+  `uart_comm_poll()` extracts complete lines and dispatches them via a
+  user-registered callback.
+- **Static memory only**: No `k_malloc`. Both RX and TX buffers are
+  compile-time allocated (2 × 2048 bytes).
+- **No DMA dependency**: Uses interrupt-driven API, compatible with the
+  original ESP32 (which lacks GDMA in Zephyr).
+
+Used on UART2 (GPIO26=RX, GPIO27=TX) for inter-board communication with
+an Arduino UNO at 115200 baud.
+
 ### MCUboot Bootloader + Dual-slot Flash Layout (`sysbuild/`, `dts/`)
 
 The project builds with **MCUboot** as the first-stage bootloader via
@@ -157,7 +178,8 @@ decision).  All slot switching is driven from the application via RTC memory.
 | USB-UART Bridge | CP2102 (integrated)             |
 | Console UART    | UART1: TX=GPIO10, RX=GPIO9      |
 | Trace UART      | UART0: TX=GPIO1, RX=GPIO3       |
-| Baud Rate       | 115200 8N1                      |
+| External UART   | UART2: TX=GPIO27, RX=GPIO26     |
+| Baud Rate       | 115200 8N1 (UART1), 115200 8N1 (UART2) |
 
 ## Prerequisites
 
@@ -233,6 +255,9 @@ my_app/
 │       └── image_update.h         # Slot-management entry point
 ├── src/
 │   ├── main.c                    # Thin entry — init + main loop
+│   ├── uart_comm/
+│   │   ├── uart_comm.h            # UART IRQ-driven communication API
+│   │   └── uart_comm.c            # ISR, circular buffers, line extraction
 │   └── image_update/
 │       ├── image_update.c         # Header compare → CRC verify → self_copy / switch
 │       ├── self_copy.c           # Slot0→slot1 flash copy + CRC verify + retry
