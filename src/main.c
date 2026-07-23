@@ -23,16 +23,21 @@ static void voltage_monitor_print(const struct device *device)
 	int error;
 
 	error = sensor_sample_fetch(device);
-	if (0 != error) {
+
+	if (0 != error)
+	{
 		log_dual_err("Voltage monitor fetch failed: %d", error);
 		return;
 	}
 
 	sensor_channel_get(device, SENSOR_CHAN_VOLTAGE, &sensor_value);
 
-	if (0xFFFF == sensor_value.val2) {
+	if (0xFFFF == sensor_value.val2)
+	{
 		log_dual_inf("[VMON] %d mV", sensor_value.val1);
-	} else {
+	}
+	else
+	{
 		log_dual_inf("[VMON] %d.%03d V  (%d mV)",
 			     sensor_value.val1, sensor_value.val2 / 1000,
 			     sensor_value.val1 * 1000 + sensor_value.val2 / 1000);
@@ -68,7 +73,9 @@ int main(void)
 	tick = 0;
 
 	boot_source = slot_selector_boot_source_read();
-	if ((0 != boot_source) && (1 != boot_source)) {
+
+	if ((0 != boot_source) && (1 != boot_source))
+	{
 		boot_source = 0;
 		slot_selector_boot_source_write(0);
 	}
@@ -82,44 +89,58 @@ int main(void)
 	log_dual_dbg("Debug trace enabled");
 	print_system_info();
 
-	if (false == device_is_ready(voltage_monitor)) {
+	if (false == device_is_ready(voltage_monitor))
+	{
 		log_dual_err("Voltage monitor not ready");
-	} else {
+	}
+	else
+	{
 		log_dual_inf("Voltage monitor ready");
 	}
 
-	if (false == gpio_is_ready_dt(&led)) {
+	if (false == gpio_is_ready_dt(&led))
+	{
 		log_dual_err("LED not ready");
-	} else {
+	}
+	else
+	{
 		gpio_pin_configure_dt(&led, GPIO_OUTPUT_INACTIVE);
 	}
 
 	error = wifi_log_init();
-	if (0 > error) {
+	
+	if (0 > error)
+	{
 		log_dual_err("Wi-Fi init: %d", error);
 	}
 
 	image_update_perform(boot_source);
 
-	if (false == device_is_ready(uart_communicator)) {
+	if (false == device_is_ready(uart_communicator))
+	{
 		log_dual_err("UART communicator not ready");
-	} else {
+	}
+	else
+	{
 		uart_comm_set_rx_callback(on_uart_line, NULL);
 		uart_comm_init(uart_communicator);
 	}
 
-	while (1) {
+	while (1)
+	{
 		tick++;
 
 		gpio_pin_toggle_dt(&led);
 
 		uart_comm_poll();
 
-		if (0 == (tick % (1000 / CONFIG_APP_LOOP_PERIOD_MS))) {
+		if (0 == (tick % (1000 / CONFIG_APP_LOOP_PERIOD_MS)))
+		{
 			voltage_monitor_print(voltage_monitor);
 		}
 
-		if (0 == (tick % CONFIG_APP_SYSTEM_INFO_INTERVAL)) {
+		if (0 == (tick % CONFIG_APP_SYSTEM_INFO_INTERVAL))
+		{
 			log_dual_wrn("Snapshot #%u", tick);
 			print_system_info();
 		}

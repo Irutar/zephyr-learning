@@ -49,11 +49,15 @@ static int verify_copy(const struct flash_area *source,
 
 	remaining = data_size;
 	offset = 0;
-	while (remaining > 0) {
+	
+	while (remaining > 0)
+	{
 		chunk = MIN(remaining, sizeof(copy_buffer));
 
 		error = flash_area_read(source, offset, copy_buffer, chunk);
-		if (0 != error) {
+
+		if (0 != error)
+		{
 			log_dual_err("Verify read slot0 failed at 0x%x: %d",
 				     offset, error);
 			return error;
@@ -61,7 +65,9 @@ static int verify_copy(const struct flash_area *source,
 		source_crc = crc32_ieee_update(source_crc, copy_buffer, chunk);
 
 		error = flash_area_read(target, offset, copy_buffer, chunk);
-		if (0 != error) {
+
+		if (0 != error)
+		{
 			log_dual_err("Verify read slot1 failed at 0x%x: %d",
 				     offset, error);
 			return error;
@@ -74,7 +80,8 @@ static int verify_copy(const struct flash_area *source,
 
 	log_dual_inf("CRC32  slot0: 0x%08x  slot1: 0x%08x", source_crc, target_crc);
 
-	if (source_crc != target_crc) {
+	if (source_crc != target_crc)
+	{
 		log_dual_err("CRC32 mismatch — copy is corrupted");
 		return -EIO;
 	}
@@ -96,20 +103,25 @@ int self_copy_sync_slots(void)
 
 	log_dual_inf("Opening slot0 (image-0) for reading...");
 	error = flash_area_open(PARTITION_ID(slot0_partition), &source_area);
-	if (0 != error) {
+
+	if (0 != error)
+	{
 		log_dual_err("Cannot open slot0: %d", error);
 		return error;
 	}
 
 	log_dual_inf("Opening slot1 (image-1) for writing...");
 	error = flash_area_open(PARTITION_ID(slot1_partition), &target_area);
-	if (0 != error) {
+
+	if (0 != error)
+	{
 		log_dual_err("Cannot open slot1: %d", error);
 		flash_area_close(source_area);
 		return error;
 	}
 
-	if (source_area->fa_size > target_area->fa_size) {
+	if (source_area->fa_size > target_area->fa_size)
+	{
 		log_dual_err("Source (%u bytes) larger than target (%u bytes) — aborting",
 			source_area->fa_size, target_area->fa_size);
 		flash_area_close(source_area);
@@ -119,11 +131,13 @@ int self_copy_sync_slots(void)
 
 	copy_size = source_area->fa_size - TRAILER_SECTOR_SIZE;
 
-	for (attempt = 1; attempt <= 2; attempt++) {
+	for (attempt = 1; attempt <= 2; attempt++)
+	{
 		log_dual_inf("Erasing slot1 (%u bytes, offset 0x%lx)...",
 			target_area->fa_size, (unsigned long)target_area->fa_off);
 		error = flash_area_erase(target_area, 0, target_area->fa_size);
-		if (0 != error) {
+		if (0 != error)
+		{
 			log_dual_err("Erase failed: %d", error);
 			goto out;
 		}
@@ -133,17 +147,22 @@ int self_copy_sync_slots(void)
 		remaining = copy_size;
 		offset = 0;
 
-		while (remaining > 0) {
+		while (remaining > 0)
+		{
 			chunk = MIN(remaining, sizeof(copy_buffer));
 
 			error = flash_area_read(source_area, offset, copy_buffer, chunk);
-			if (0 != error) {
+
+			if (0 != error)
+			{
 				log_dual_err("Read failed at offset 0x%x: %d", offset, error);
 				goto out;
 			}
 
 			error = flash_area_write(target_area, offset, copy_buffer, chunk);
-			if (0 != error) {
+
+			if (0 != error)
+			{
 				log_dual_err("Write failed at offset 0x%x: %d", offset, error);
 				goto out;
 			}
@@ -153,11 +172,14 @@ int self_copy_sync_slots(void)
 		}
 
 		error = verify_copy(source_area, target_area, copy_size);
-		if (0 == error) {
+
+		if (0 == error)
+		{
 			break;
 		}
 
-		if (2 == attempt) {
+		if (2 == attempt)
+		{
 			log_dual_err("Copy verification failed after retry — halting");
 			goto out;
 		}
@@ -168,8 +190,11 @@ int self_copy_sync_slots(void)
 	log_dual_inf("Erasing slot1 trailer sector (%u bytes at offset 0x%lx)...",
 		TRAILER_SECTOR_SIZE,
 		(unsigned long)(target_area->fa_off + copy_size));
+
 	error = flash_area_erase(target_area, copy_size, TRAILER_SECTOR_SIZE);
-	if (0 != error) {
+
+	if (0 != error)
+	{
 		log_dual_err("Trailer erase failed: %d", error);
 		goto out;
 	}

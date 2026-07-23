@@ -35,7 +35,8 @@ static int slots_crc32_compare(const struct flash_area *slot0,
 	log_dual_inf("Verifying slot integrity (CRC32 of %u bytes)...",
 		     data_size);
 
-	while (remaining > 0) {
+	while (remaining > 0)
+	{
 		chunk = MIN(remaining, sizeof(verify_buffer));
 
 		flash_area_read(slot0, offset, verify_buffer, chunk);
@@ -50,7 +51,8 @@ static int slots_crc32_compare(const struct flash_area *slot0,
 
 	log_dual_inf("CRC32  slot0: 0x%08x  slot1: 0x%08x", crc0, crc1);
 
-	if (crc0 != crc1) {
+	if (crc0 != crc1)
+	{
 		log_dual_err("CRC mismatch — slots are not identical");
 		return -EIO;
 	}
@@ -81,7 +83,8 @@ void image_update_reboot(void)
 	*(volatile uint32_t *)0x3FF48000 = 0x80000000;
 
 	/* Paranoia — spin forever if the reset doesn't take. */
-	while (1) {
+	while (1)
+	{
 		__asm__ __volatile__("waiti 0");
 	}
 }
@@ -97,13 +100,17 @@ void image_update_perform(uint32_t boot_source)
 	log_dual_inf("Checking slot consistency...");
 
 	error = flash_area_open(PARTITION_ID(slot0_partition), &slot0_area);
-	if (0 != error) {
+
+	if (0 != error)
+	{
 		log_dual_err("Cannot open slot0: %d", error);
 		return;
 	}
 
 	error = flash_area_open(PARTITION_ID(slot1_partition), &slot1_area);
-	if (0 != error) {
+
+	if (0 != error)
+	{
 		log_dual_err("Cannot open slot1: %d", error);
 		flash_area_close(slot0_area);
 		return;
@@ -112,7 +119,9 @@ void image_update_perform(uint32_t boot_source)
 	flash_area_read(slot0_area, 0, header0, sizeof(header0));
 	flash_area_read(slot1_area, 0, header1, sizeof(header1));
 
-	if (0 != memcmp(header0, header1, sizeof(header0))) {
+	if (0 != memcmp(header0, header1, sizeof(header0)))
+	
+	{
 		flash_area_close(slot0_area);
 		flash_area_close(slot1_area);
 		log_dual_inf("Slot headers differ — starting synchronisation");
@@ -120,12 +129,14 @@ void image_update_perform(uint32_t boot_source)
 		return;
 	}
 
-	if (0 == boot_source) {
+	if (0 == boot_source)
+	{
 		error = slots_crc32_compare(slot0_area, slot1_area);
 		flash_area_close(slot0_area);
 		flash_area_close(slot1_area);
 
-		if (0 != error) {
+		if (0 != error)
+		{
 			log_dual_err("CRC mismatch — forcing re-copy");
 			self_copy_sync_slots();
 			return;

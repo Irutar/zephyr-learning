@@ -40,23 +40,32 @@ struct vmon_config {
 
 static int vmon_fetch_adc(const struct device *dev)
 {
-	struct vmon_config *cfg = dev->config;
-	struct vmon_data *data = dev->data;
+	struct vmon_config *config;
+	struct vmon_data *data;
 	int16_t raw;
-	struct adc_sequence seq = {
-		.buffer = &raw,
-		.buffer_size = sizeof(raw),
-	};
+	int32_t millivolts;
+	int error;
+	struct adc_sequence sequence;
 
-	adc_sequence_init_dt(&cfg->adc, &seq);
-	int err = adc_read(cfg->adc.dev, &seq);
-	if (err < 0) {
-		return err;
+	config = dev->config;
+	data = dev->data;
+
+	sequence.buffer = &raw;
+	sequence.buffer_size = sizeof(raw);
+
+	adc_sequence_init_dt(&config->adc, &sequence);
+
+	error = adc_read(config->adc.dev, &sequence);
+
+	if (0 > error)
+	{
+		return error;
 	}
 
-	int32_t mv = raw;
-	adc_raw_to_millivolts_dt(&cfg->adc, &mv);
-	data->raw_mv = mv;
+	millivolts = raw;
+	adc_raw_to_millivolts_dt(&config->adc, &millivolts);
+	data->raw_mv = millivolts;
+	
 	return 0;
 }
 
@@ -67,30 +76,48 @@ static int vmon_fetch_adc(const struct device *dev)
 
 static int vmon_fetch_i2c(const struct device *dev)
 {
-	struct vmon_config *cfg = dev->config;
-	struct vmon_data *data = dev->data;
-	uint8_t buf[8] = { 0 };
-	int n = cfg->i2c_read_bytes;
+	struct vmon_config *config;
+	struct vmon_data *data;
+	uint8_t buffer[8];
+	int read_bytes;
+	int error;
+	uint32_t raw;
+	int byte_index;
 
-	if (n > (int)sizeof(buf)) {
-		n = sizeof(buf);
+	config = dev->config;
+	data = dev->data;
+
+	buffer[0] = 0;
+	buffer[1] = 0;
+	buffer[2] = 0;
+	buffer[3] = 0;
+	buffer[4] = 0;
+	buffer[5] = 0;
+	buffer[6] = 0;
+	buffer[7] = 0;
+
+	read_bytes = config->i2c_read_bytes;
+
+	if (read_bytes > (int)sizeof(buffer))
+	{
+		read_bytes = sizeof(buffer);
 	}
 
-	int ret = i2c_read_dt(&cfg->i2c, buf, n);
-	if (ret < 0) {
-		log_dual_err("I2C read failed: %d", ret);
-		return ret;
+	error = i2c_read_dt(&config->i2c, buffer, read_bytes);
+	if (0 > error)
+	{
+		log_dual_err("I2C read failed: %d", error);
+		return error;
 	}
 
-	/* Assemble little-endian bytes into raw value */
-	uint32_t raw = 0;
-	for (int i = 0; i < n; i++) {
-		raw |= ((uint32_t)buf[i]) << (i * 8);
+	raw = 0;
+	for (byte_index = 0; byte_index < read_bytes; byte_index++)
+	{
+		raw |= ((uint32_t)buffer[byte_index]) << (byte_index * 8);
 	}
 
-	/* Apply scaling: mV = raw * NUM / DEN */
 	data->raw_mv = (int32_t)((raw * CONFIG_VMON_I2C_SCALE_NUM)
-				/ CONFIG_VMON_I2C_SCALE_DEN);
+				 / CONFIG_VMON_I2C_SCALE_DEN);
 	return 0;
 }
 
@@ -99,7 +126,8 @@ static int vmon_fetch_i2c(const struct device *dev)
 
 static int vmon_sample_fetch(const struct device *dev, enum sensor_channel chan)
 {
-	if (chan != SENSOR_CHAN_ALL && chan != SENSOR_CHAN_VOLTAGE) {
+	if (chan != SENSOR_CHAN_ALL && chan != SENSOR_CHAN_VOLTAGE)
+	{
 		return -ENOTSUP;
 	}
 
@@ -113,9 +141,12 @@ static int vmon_sample_fetch(const struct device *dev, enum sensor_channel chan)
 static int vmon_channel_get(const struct device *dev, enum sensor_channel chan,
 			    struct sensor_value *val)
 {
-	struct vmon_data *data = dev->data;
+	struct vmon_data *data;
 
-	if (chan != SENSOR_CHAN_VOLTAGE) {
+	data = dev->data;
+
+	if (chan != SENSOR_CHAN_VOLTAGE)
+	{
 		return -ENOTSUP;
 	}
 
