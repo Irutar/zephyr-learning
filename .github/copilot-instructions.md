@@ -170,6 +170,12 @@
   public function and trust the compiler's link-time optimisation (LTO).
 
 ## Git Rules
+
+- **Target repository**: All commits go to **`Irutar/zephyr-learning`**
+  (remote `origin`, branch `main`). This is the `my_app/` directory inside
+  the west workspace (`/home/irutar/zephyrproject/my_app`).
+  **Never** commit to `zephyrproject-rtos/zephyr` — that is the upstream
+  Zephyr RTOS repository and must remain untouched.
 - **NEVER** run `git add`, `git commit`, or `git push` unless the user
   explicitly says something like "zrób commit", "commitnij", "wypchnij", etc.
 - `git status`, `git diff`, `git log` are fine anytime.

@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "uart_comm/uart_comm.h"
+#include "gpio_event/gpio_event.h"
 
 #define DUAL_LOG_TAG "main"
 #include <app/wifi_log.h>
@@ -16,6 +17,14 @@ LOG_MODULE_REGISTER(my_app, LOG_LEVEL_DBG);
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(DT_NODELABEL(led0), gpios);
 static const struct device *voltage_monitor = DEVICE_DT_GET(DT_NODELABEL(vmon));
 static const struct device *uart_communicator = DEVICE_DT_GET(DT_NODELABEL(uart2));
+
+static volatile uint32_t gpio_event_trigger_count;
+
+static void gpio_event_handler(void)
+{
+	gpio_event_trigger_count++;
+	log_dual_inf("[GPIO_EVENT] trigger #%u", gpio_event_trigger_count);
+}
 
 static void voltage_monitor_print(const struct device *device)
 {
@@ -124,6 +133,13 @@ int main(void)
 	{
 		uart_comm_set_rx_callback(on_uart_line, NULL);
 		uart_comm_init(uart_communicator);
+	}
+
+	error = gpio_event_initialize(gpio_event_handler);
+
+	if (0 != error)
+	{
+		log_dual_err("GPIO event init failed: %d", error);
 	}
 
 	while (1)

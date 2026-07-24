@@ -29,6 +29,10 @@
 	status = "okay";
 };
 
+&gpio1 {
+	status = "okay";
+};
+
 &uart2 {
 	status = "okay";
 	current-speed = <115200>;
@@ -51,5 +55,13 @@
 			gpios = <&gpio0 2 GPIO_ACTIVE_HIGH>;
 			label = "Heartbeat";
 		};
+	};
+
+	gpio-event {
+		 compatible = "gpio-keys";
+		 gpio_event0: gpio_event_0 {
+			gpios = <&gpio1 (36-32) (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
+			label = "GPIO Event";
+		 };
 	};
 };

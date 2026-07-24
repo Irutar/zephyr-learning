@@ -31,6 +31,7 @@ set(DTS_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_sources(app PRIVATE src/main.c)
 target_sources(app PRIVATE src/uart_comm/uart_comm.c)
+target_sources(app PRIVATE src/gpio_event/gpio_event.c)
 target_sources(app PRIVATE src/image_update/image_update.c)
 target_sources(app PRIVATE src/image_update/self_copy.c)
 target_sources(app PRIVATE src/image_update/slot_selector.c)

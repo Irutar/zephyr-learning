@@ -79,6 +79,22 @@ UART API. Designed with safety-critical patterns in mind:
 Used on UART2 (GPIO26=RX, GPIO27=TX) for inter-board communication with
 an Arduino UNO at 115200 baud.
 
+### GPIO Event Input (`src/gpio_event/`)
+
+A simple GPIO input event detector built on Zephyr's interrupt-driven GPIO
+API. Monitors a single pin for rising-edge events and notifies the application
+via a user-provided callback.
+
+- **Interrupt-driven**: ISR fires on rising edge, then a delayed work queue
+  item invokes the callback at thread level after a short debounce delay.
+- **Callback-based**: `gpio_event_initialize()` registers a callback of type
+  `gpio_event_callback_t`. On each trigger the callback runs in work-queue
+  context — safe to call kernel APIs.
+- **Devicetree-defined pin**: The monitored pin is `gpio_event0` under the
+  `gpio-event` node in the board overlay (`boards/esp32_devkitc_esp32_procpu.overlay`).
+  Currently configured on GPIO36 with pull-down, rising-edge trigger.
+- **Zero-copy**: The module uses static storage only — no dynamic allocation.
+
 ### MCUboot Bootloader + Dual-slot Flash Layout (`sysbuild/`, `dts/`)
 
 The project builds with **MCUboot** as the first-stage bootloader via
@@ -258,12 +274,15 @@ my_app/
 │   ├── uart_comm/
 │   │   ├── uart_comm.h            # UART IRQ-driven communication API
 │   │   └── uart_comm.c            # ISR, circular buffers, line extraction
+│   ├── gpio_event/
+│   │   ├── gpio_event.h           # GPIO event detector API
+│   │   └── gpio_event.c           # ISR, debounce, callback dispatch
 │   └── image_update/
 │       ├── image_update.c         # Header compare → CRC verify → self_copy / switch
 │       ├── self_copy.c           # Slot0→slot1 flash copy + CRC verify + retry
 │       └── slot_selector.c       # RTC magic write + hardware reboot
 ├── support/
-│   └── syslog_collector/         # Remote syslog receiver scripts
+│   └── esp32_openocd.cfg         # OpenOCD configuration for ESP32 JTAG debugging
 └── sysbuild/
     ├── CMakeLists.txt             # Sysbuild glue
     ├── mcuboot.conf               # MCUboot Kconfig overrides
