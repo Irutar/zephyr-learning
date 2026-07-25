@@ -93,7 +93,7 @@ via a user-provided callback.
 - **Devicetree-defined pin**: The monitored pin is `gpio_event0` under the
   `gpio-event` node in the board overlay (`boards/esp32_devkitc_esp32_procpu.overlay`).
   Currently configured on GPIO36 with pull-down, rising-edge trigger.
-- **Zero-copy**: The module uses static storage only — no dynamic allocation.
+- **Static memory only**: The module uses static storage only — no dynamic allocation.
 
 ### MCUboot Bootloader + Dual-slot Flash Layout (`sysbuild/`, `dts/`)
 
